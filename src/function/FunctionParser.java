@@ -10,9 +10,12 @@ public class FunctionParser {
         len = e.length;
     }
     
-    public Function parse() {
+    public Function parse() throws ParserException {
         i = 0;
-        return parseExpression();
+        Function f = parseExpression();
+        if (inExp() || f == null)
+            throw new ParserException("Incorrect expression");
+        return f;
     }
     
     private boolean inExp() {
@@ -37,13 +40,13 @@ public class FunctionParser {
         return Character.digit(c, 10);
     }
     
-    private Function parseExpression() {
+    private Function parseExpression() throws ParserException {
         Function f;
         skipSp();
-        if (e[i] == '-') {
+        if (inExp() && e[i] == '-') {
             i++;
             f = new UnaryOp(UnaryOp.MINUS, parseTerm());
-        } else if (e[i] == '+')
+        } else if (inExp() && e[i] == '+')
             i++;
         f = parseTerm();
         while (inExp() && (e[i] == '+' || e[i] == '-')) {
@@ -54,7 +57,7 @@ public class FunctionParser {
         return f;
     }
 
-    private Function parseTerm() {
+    private Function parseTerm() throws ParserException {
         Function f;
         skipSp();
         f = parseFactor();
@@ -66,12 +69,12 @@ public class FunctionParser {
         return f;
     }
 
-    private Function parseFactor() {
+    private Function parseFactor() throws ParserException {
         skipSp();
         Function f;
-        if (isAlpha(e[i])) {
+        if (inExp() && isAlpha(e[i])) {
             String fName = "";
-            while (isAlpha(e[i]) && inExp())
+            while (inExp() && isAlpha(e[i]))
                 fName += e[i++];
             fName = fName.toLowerCase();
             if (fName.equals("sin"))
@@ -85,28 +88,33 @@ public class FunctionParser {
             else if (fName.equals("t"))
                 f = new Argument();
             else
-                f = null;
+                throw new ParserException("Unknown function or constant " +
+                                           fName);
         } else
             f = parseAtom();
         skipSp();
         return f;
     }
 
-    private Function parseAtom() {
+    private Function parseAtom() throws ParserException {
         Function f = null;
         skipSp();
+        if (!inExp())
+            throw new ParserException("Incorrect expression");
         if (e[i] == '(') {
             i++;
             f = parseExpression();
+            if (!inExp() || e[i] != ')')
+                throw new ParserException("Expected ')'");
             i++;
         } else if (isDigit(e[i])) {
             double val = 0.0;
-            while (isDigit(e[i]) && inExp())
+            while (inExp() && isDigit(e[i]))
                 val = val * 10.0 + toDigit(e[i++]);
-            if (e[i] == '.') {
+            if (inExp() && e[i] == '.') {
                 i++;
                 double d = 0.1;
-                while (isDigit(e[i]) && inExp()) {
+                while (inExp() && isDigit(e[i])) {
                     val += toDigit(e[i++]) * d;
                     d /= 10.0;
                 }

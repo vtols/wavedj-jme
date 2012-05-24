@@ -1,23 +1,22 @@
 package wavedj;
 
-import function.Function;
-import function.FunctionParser;
+import function.*;
 import java.io.*;
 
 public class StreamGenerator extends InputStream {
     
     int wP = 0, rP = 0, ds = 44 + 8000;
     byte[] data = new byte[ds];
+    FunctionParser parser;
     Function func;
 
     StreamGenerator(String strFunc) {
-        FunctionParser p = new FunctionParser(strFunc);
-        func = p.parse();
+        parser = new FunctionParser(strFunc);
     }
     
-    void generate() {
+    void generate() throws ParserException {
+        func = parser.parse();
         genHeader();
-        
         genSound();
     }
     

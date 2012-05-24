@@ -1,5 +1,6 @@
 package wavedj;
 
+import function.ParserException;
 import java.io.*;
 import javax.microedition.lcdui.*;
 import javax.microedition.media.*;
@@ -26,7 +27,23 @@ public class WaveForm extends Form implements CommandListener {
                 Player p = Manager.createPlayer(sg, "audio/x-wav"); 
                 p.start();
             } catch (IOException ex) {
+                Alert alert = new Alert("Error playing sound",
+                                         ex.getMessage(),
+                                         null, AlertType.WARNING);
+                alert.setTimeout(2000);
+                WaveMidlet.disp.setCurrent(alert, this);
             } catch (MediaException ex) {
+                Alert alert = new Alert("Error playing sound",
+                                         ex.getMessage(),
+                                         null, AlertType.WARNING);
+                alert.setTimeout(2000);
+                WaveMidlet.disp.setCurrent(alert, this);
+            } catch (ParserException ex) {
+                Alert alert = new Alert("Parse error",
+                                         ex.getMessage(),
+                                         null, AlertType.WARNING);
+                alert.setTimeout(2000);
+                WaveMidlet.disp.setCurrent(alert, this);
             }
         }
     }

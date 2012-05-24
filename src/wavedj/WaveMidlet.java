@@ -4,9 +4,11 @@ import javax.microedition.midlet.*;
 import javax.microedition.lcdui.Display;
 
 public class WaveMidlet extends MIDlet {
+    
+    public static Display disp;
 
     public void startApp() {
-        Display disp = Display.getDisplay(this);
+        disp = Display.getDisplay(this);
         disp.setCurrent(new WaveForm());
     }
     
