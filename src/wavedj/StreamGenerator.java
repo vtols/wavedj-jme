@@ -7,6 +7,7 @@ public class StreamGenerator extends InputStream {
     
     int wP = 0, rP = 0, ds = 44 + 8000;
     byte[] data = new byte[ds];
+    double[] ddata = new double[8000];
     FunctionParser parser;
     Function func;
 
@@ -39,9 +40,20 @@ public class StreamGenerator extends InputStream {
     }
     
     void genSound() {
-        float t = 0.0f, dt = 1.0f / 8000;
+        double t = 0.0, dt = 1.0 / 8000;
+        double ymin = 0.0, ymax = 0.0;
         for (int i = 0; i < 8000; i++, t += dt) {
-            data[wP++] = (byte)(func.eval(t) * 127 + 127);
+            double y = func.eval(t);
+            ddata[i] = y;
+            if (y < ymin)
+                ymin = y;
+            if (y > ymax)
+                ymax = y;
+        }
+        double dy = ymax - ymin;
+        for (int i = 0; i < 8000; i++) {
+            double sy = ddata[i] - ymin;
+            data[wP++] = (byte)(sy * 127 / dy);
         }
     }
     
